@@ -19,7 +19,6 @@ class CategoryController extends Controller
         return view('admin.category.index', compact('categories'));
     }
 
-
     /// For Search Button
     public function search(Request $request)
     {
