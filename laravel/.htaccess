@@ -1,0 +1,5 @@
+<IfModule mod_rewrite.c>
+RewriteEngine On
+RedirectMatch 301 ^/public_html https://kiranfamilymemorialhospital.com.pk/laravel/
+</IfModule>
+
