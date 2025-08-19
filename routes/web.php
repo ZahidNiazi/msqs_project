@@ -3,22 +3,18 @@
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\BrandController;
 use App\Http\Controllers\CategoryController;
-use App\Http\Controllers\BlogCategoryController;
 use App\Http\Controllers\ClientController;
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\EmployeeController;
 use App\Http\Controllers\McqsController;
-use App\Http\Controllers\HomeCOntroller;
-use App\Http\Controllers\Pages;
-use App\Http\Controllers\PagesController;
-use App\Http\Controllers\SearchController;
 use App\Http\Controllers\PostController;
-use App\Models\Search;
+use App\Http\Controllers\TopicController;
 use Illuminate\Support\Facades\Route;
-use App\Models\SubCategory;
 use App\Http\Controllers\Frontend\McqController;
 use App\Http\Controllers\SubCategoryController;
+use App\Http\Controllers\AjaxController;
+
 
 
 /*
@@ -118,6 +114,33 @@ Route::controller(SubCategoryController::class)->prefix('subcategory')->group(fu
     Route::get('/subcategories/{category_id}', 'getByCategory');
 });
 
+Route::get('/get-subcategories/{category}', [SubCategoryController::class, 'getByCategory']);
+
+
+Route::prefix('admin')->group(function () {
+    Route::get('/topics', [TopicController::class, 'index'])->name('admin.all.topic');
+    Route::get('/topics/add', [TopicController::class, 'add'])->name('admin.add.topic');
+    Route::post('/topics/save', [TopicController::class, 'save'])->name('admin.save.topic');
+    Route::get('/topics/edit/{id}', [TopicController::class, 'edit'])->name('admin.edit.topic');
+    Route::post('/topics/update/{id}', [TopicController::class, 'update'])->name('admin.update.topic');
+    Route::get('/topics/delete/{id}', [TopicController::class, 'delete'])->name('admin.delete.topic');
+
+    // For dynamic dropdowns
+    Route::get('/topics/by-subcategory/{id}', [TopicController::class, 'getBySubcategory']);
+    Route::get('/admin/topic/add', [TopicController::class, 'addTopicForm'])->name('admin.add.topic');
+Route::post('/admin/topic/save', [TopicController::class, 'saveTopic'])->name('admin.save.topic');
+
+});
+// routes/web.php
+Route::prefix('admin')->name('admin.')->group(function () {
+    Route::resource('pages', \App\Http\Controllers\Admin\PageController::class);
+});
+
+Route::get('/get-subcategories/{category}', [SubCategoryController::class, 'getByCategory']);
+
+Route::get('/get-subcategories/{category}', [AjaxController::class, 'getSubcategories']);
+Route::get('/get-topics/{subcategory}', [AjaxController::class, 'getTopics']);
+;
 
 //// Search Cateory
 Route::namespace('App\Http\Controllers')->group(function () {
@@ -138,6 +161,7 @@ Route::controller(McqsController::class)->prefix('mcqs')->group(function () {
     Route::post('/mcqs/import', 'import')->name('mcqs.import');
 });
 
+Route::resource('aboutus', App\Http\Controllers\Admin\AboutUsController::class);
 //Braand Routes
 Route::controller(BrandController::class)->prefix('brand')->group(function () {
     Route::get('create', 'index')->name('all.brand');

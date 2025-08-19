@@ -15,10 +15,11 @@ class CreateMcqsTable extends Migration
     {
         Schema::create('mcqs', function (Blueprint $table) {
             $table->id();
+
             $table->unsignedBigInteger('category_id')->index();
-            $table->foreign('category_id')->references('id')->on('categories')->onDelete('cascade');
             $table->unsignedBigInteger('subcategory_id')->nullable()->index();
-            $table->foreign('subcategory_id')->references('id')->on('subcategories');
+            $table->unsignedBigInteger('topic_id')->nullable()->index();
+
             $table->string('question');
             $table->string('option_a');
             $table->string('option_b');
@@ -26,8 +27,12 @@ class CreateMcqsTable extends Migration
             $table->string('option_d');
             $table->string('correct_option')->default('a');
             $table->text('explanation');
+            $table->string('title')->nullable();
+            $table->string('image')->nullable();
+
             $table->timestamps();
         });
+
     }
 
     /**
@@ -38,5 +43,6 @@ class CreateMcqsTable extends Migration
     public function down()
     {
         Schema::dropIfExists('mcqs');
+
     }
 }

@@ -62,6 +62,18 @@
             @error('subcategory_id')<span class="text-danger">{{ $message }}</span>@enderror
         </div>
         <div class="col-md-3">
+            <label class="form-label">Topic</label>
+            <select class="form-control @error('topic_id') is-invalid @enderror" id="topic_id" name="topic_id" required>
+                <option value="">Please Select</option>
+                @foreach($topics as $topic)
+                    <option value="{{ $topic->id }}" @if(old('topic_id', $mcq->topic_id ?? '') == $topic->id) selected @endif>
+                        {{ $topic->name }}
+                    </option>
+                @endforeach
+            </select>
+            @error('topic_id')<span class="text-danger">{{ $message }}</span>@enderror
+        </div>
+        <div class="col-md-3">
             <label class="form-label">Correct Option</label>
             <select name="correct_option" class="form-control select2">
                 @foreach(['a', 'b', 'c', 'd'] as $letter)
@@ -79,12 +91,6 @@
             <input type="text" class="form-control @error('title') is-invalid @enderror" name="title" value="{{ old('title', $mcq->title ?? '') }}" placeholder="Title">
             @error('title')<span class="text-danger">{{ $message }}</span>@enderror
         </div>
-        {{--
-        <div class="col-md-3">
-            <label class="form-label">Image</label>
-            <input type="file" class="form-control @error('image') is-invalid @enderror" name="image">
-            @error('image')<span class="text-danger">{{ $message }}</span>@enderror
-        </div> --}}
     </div>
     <div class="row mt-4">
         <div class="col-md-12 text-end">

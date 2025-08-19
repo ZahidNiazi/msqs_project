@@ -79,4 +79,5 @@ class SubCategoryController extends Controller
         return redirect()->route('all.subcategory')->with('success', 'Subcategory deleted successfully');
     }
 
+
 }

@@ -26,29 +26,6 @@
 
 </div>
 </div>
-<script>
-
-
-    // $("#category_id").change(function() {
-    //  $.ajax({
-    //                 url: '/order/fetchProducts/' + this.value,
-    //                 type: 'GET',
-    //                 dataType: 'json',
-    //                 success: function (response) {
-    //                     $('#products').val('');
-    //                     $('#products').html('<option value="">Select Products</option>');
-
-
-    //                     $.each(response.products, function (i,item) {
-    //                         // console.log(response.products);
-    //                    $product =$('#products').append(new Option(item.name, item.id));
-    //                    $('#products').append($product);
-    //                     });
-    //                 }
-    //             });
-
-    //     });
-</script>
 
 
 @endsection

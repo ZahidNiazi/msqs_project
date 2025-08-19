@@ -32,9 +32,15 @@ class Subcategory extends Model
     public function brand(){
         return $this->belongsTo(Brand::class);
     }
-    
+
     public function subcategories()
     {
         return $this->hasMany(Subcategory::class);
     }
+
+    public function topics()
+    {
+        return $this->hasMany(Topic::class);
+    }
+
 }

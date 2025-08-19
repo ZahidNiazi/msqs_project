@@ -270,11 +270,9 @@
             class="bg-yellow-300 text-green-900 px-4 py-2 rounded-full font-semibold ml-0 sm:ml-6 text-sm mt-4 sm:mt-0">NEW</span>
     </section>
     @if (isset($selectedCategory) && $selectedCategory->file)
-        <img src="{{ asset('assets/banner/'.$selectedCategory->file) }}" alt="{{ $selectedCategory->name }}"
+        <img src="{{ asset('assets/banner/' . $selectedCategory->file) }}" alt="{{ $selectedCategory->name }}"
             class="w-full max-w-7xl mx-auto h-64 object-cover mt-5 rounded-lg shadow-md block">
     @endif
-
-
 
     <!-- Main Content and Right Sidebar Wrapper -->
     <div class="container mx-auto py-10 md:px-0 sm:px-6 max-w-7xl flex flex-col md:flex-row gap-8">
@@ -362,70 +360,66 @@
                     </div>
                 </div>
                 <!-- Question 1 -->
-        @foreach ($mcqs as $index => $mcq)
-        <section class="question-section" tabindex="0" aria-label="Question {{ $index + 1 }}">
-            <div class="flex items-start space-x-4 mb-4">
-                <div class="question-number">{{ $index + 1 }}</div>
-                <div class="question-text">
-                    {{ $mcq->question }}
-                </div>
-            </div>
+                @foreach ($mcqs as $index => $mcq)
+                    <section class="question-section" tabindex="0" aria-label="Question {{ $index + 1 }}">
+                        <div class="flex items-start space-x-4 mb-4">
+                            <div class="question-number">{{ $index + 1 }}</div>
+                            <div class="question-text">
+                                {{ $mcq->question }}
+                            </div>
+                        </div>
+                        <form class="answer-options" role="radiogroup">
+                            <label>
+                                {!! $mcq->correct_option == 'a' ? '<b>A. ' . e($mcq->option_a) . '</b>' : 'A. ' . e($mcq->option_a) !!}
+                            </label>
 
-            <form class="answer-options" role="radiogroup">
-                <label>
-                    <input type="radio" name="q{{ $mcq->id }}" {{ $mcq->correct_option == 'a' ? 'checked' : '' }} />
-                    {{ $mcq->option_a }}
-                </label>
+                            <label>
+                                {!! $mcq->correct_option == 'b' ? '<b>B. ' . e($mcq->option_b) . '</b>' : 'B. ' . e($mcq->option_b) !!}
+                            </label>
 
-                <label>
-                    <input type="radio" name="q{{ $mcq->id }}" {{ $mcq->correct_option == 'b' ? 'checked' : '' }} />
-                    {{ $mcq->option_b }}
-                </label>
+                            <label>
+                                {!! $mcq->correct_option == 'c' ? '<b>C. ' . e($mcq->option_c) . '</b>' : 'C. ' . e($mcq->option_c) !!}
+                            </label>
 
-                <label>
-                    <input type="radio" name="q{{ $mcq->id }}" {{ $mcq->correct_option == 'c' ? 'checked' : '' }} />
-                    {{ $mcq->option_c }}
-                </label>
+                            <label>
+                                {!! $mcq->correct_option == 'd' ? '<b>D. ' . e($mcq->option_d) . '</b>' : 'D. ' . e($mcq->option_d) !!}
+                            </label>
+                        </form>
+                        <div class="btn-group mt-3">
+                            <button class="btn-answer" type="button" onclick="toggleAnswer({{ $mcq->id }})">
+                                <i class="fas fa-check-circle"></i> Answer & Solution
+                            </button>
 
-                <label>
-                    <input type="radio" name="q{{ $mcq->id }}" {{ $mcq->correct_option == 'd' ? 'checked' : '' }} />
-                    {{ $mcq->option_d }}
-                </label>
-            </form>
+                            <a href="{{ url('report/' . $mcq->id) }}" class="text-white btn-discuss">
+                                <i class="fas fa-comments"></i> Discuss in Board
+                            </a>
+                        </div>
 
-            <div class="btn-group mt-3">
-                <button class="btn-answer" type="button" onclick="toggleAnswer({{ $mcq->id }})">
-                    <i class="fas fa-check-circle"></i> Answer & Solution
-                </button>
+                        <div id="answer-box-{{ $mcq->id }}" class="answer-box mt-3" aria-live="polite" hidden>
+                            <div>
+                                <strong>Answer:</strong>
+                                @if ($mcq->correct_option == 'a')
+                                    {{ $mcq->option_a }}
+                                @elseif($mcq->correct_option == 'b')
+                                    {{ $mcq->option_b }}
+                                @elseif($mcq->correct_option == 'c')
+                                    {{ $mcq->option_c }}
+                                @elseif($mcq->correct_option == 'd')
+                                    {{ $mcq->option_d }}
+                                @endif
+                            </div>
 
-                <a href="{{ url('report/' . $mcq->id) }}" class="btn-discuss">
-                    <i class="fas fa-comments"></i> Discuss in Board
-                </a>
-            </div>
-
-            <div id="answer-box-{{ $mcq->id }}" class="answer-box mt-3" aria-live="polite" hidden>
-                <div>
-                    <strong>Answer:</strong>
-                    @if($mcq->correct_option == 'a') {{ $mcq->option_a }}
-                    @elseif($mcq->correct_option == 'b') {{ $mcq->option_b }}
-                    @elseif($mcq->correct_option == 'c') {{ $mcq->option_c }}
-                    @elseif($mcq->correct_option == 'd') {{ $mcq->option_d }}
-                    @endif
-                </div>
-
-                <div class="mt-2">
-                    @if(!empty($mcq->explanation))
-                        {{ $mcq->explanation }}
-                    @else
-                        No explanation is given for this question.
-                        <a href="#" class="underline">Let's Discuss on Board</a>
-                    @endif
-                </div>
-            </div>
-        </section>
-        @endforeach
-
-
+                            <div class="mt-2">
+                                @if (!empty($mcq->explanation))
+                                    {{ $mcq->explanation }}
+                                @else
+                                    No explanation is given for this question.
+                                    <a href="#" class="underline">Let's Discuss on Board</a>
+                                @endif
+                            </div>
+                        </div>
+                    </section>
+                @endforeach
                 <!-- Pagination -->
                 <nav class="pagination" aria-label="Pagination">
                     <div class="pagination-container text-center mt-4">
@@ -496,4 +490,4 @@
         let box = document.getElementById(`answer-box-${id}`);
         box.hidden = !box.hidden;
     }
-    </script>
+</script>

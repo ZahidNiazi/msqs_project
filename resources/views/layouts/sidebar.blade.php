@@ -56,6 +56,21 @@
         </div>
     </li>
 
+    <!-- Topics -->
+    <li class="nav-item active">
+        <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseTopic"
+            aria-expanded="true" aria-controls="collapseTopic">
+            <i class="fas fa-book-open"></i>
+            <span>Topics</span>
+        </a>
+        <div id="collapseTopic" class="collapse" aria-labelledby="headingTopic" data-parent="#accordionSidebar">
+            <div class="bg-white py-2 collapse-inner rounded">
+                <a class="collapse-item" href="{{ route('admin.add.topic') }}">Add Topic</a>
+                <a class="collapse-item" href="{{ route('admin.all.topic') }}">View Topics</a>
+            </div>
+        </div>
+    </li>
+
     <!-- Nav Item - Pages Collapse Menu -->
     <li class="nav-item  active">
         <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapse2"
@@ -71,6 +86,22 @@
             </div>
         </div>
     </li>
+
+    <li class="nav-item">
+        <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseAboutUs"
+            aria-expanded="true" aria-controls="collapseAboutUs">
+            <i class="fas fa-info-circle"></i>
+            <span>About Us</span>
+        </a>
+        <div id="collapseAboutUs" class="collapse" aria-labelledby="headingAboutUs" data-parent="#accordionSidebar">
+            <div class="bg-white py-2 collapse-inner rounded">
+                <a class="collapse-item" href="{{ route('aboutus.create') }}">Add About Us</a>
+                <a class="collapse-item" href="{{ route('aboutus.index') }}">View About Us</a>
+            </div>
+        </div>
+    </li>
+
+
 
     <!-- Nav Item - Pages Collapse Menu -->
     <li class="nav-item  active">
@@ -95,7 +126,7 @@
         </a>
         <div id="collapse223" class="collapse" aria-labelledby="heading23" data-parent="#accordionSidebar">
             <div class="bg-white py-2 collapse-inner rounded">
-                {{-- <h6 class="collapse-header">Custom Components:</h6> 
+                {{-- <h6 class="collapse-header">Custom Components:</h6>
                 <a class="collapse-item" href="{{route('post.add')}}">Add Blog</a>
                 <a class="collapse-item" href="{{ route('all.post') }}">View Blog</a>
             </div>
