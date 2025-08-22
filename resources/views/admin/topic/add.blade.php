@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('contents')
-<div class="container">
+<div class="container-fluid">
     <h2 class="mb-4">Add New Topic</h2>
 
     <form action="{{ route('admin.save.topic') }}" method="POST">

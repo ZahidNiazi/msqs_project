@@ -95,10 +95,11 @@
             <!-- Desktop Nav -->
             <nav class="hidden sm:flex space-x-6 text-lg font-semibold whitespace-nowrap">
                 <a href="{{ url('/') }}" class="hover:text-green-600 transition">Home</a>
-                <a href="#" class="hover:text-green-600 transition">Notes</a>
+                <a href="{{ route('frontend.aboutus') }}" class="hover:text-green-600 transition">About Us</a>
                 <a href="#" class="hover:text-green-600 transition">Past Papers</a>
                 <a href="#" class="hover:text-green-600 transition">Mock Test</a>
                 <a href="#" class="hover:text-green-600 transition">Submit MCQs</a>
+                <a href="#" class="hover:text-green-600 transition">Notes</a>
             </nav>
 
             <!-- Auth / Social -->

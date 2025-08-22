@@ -25,7 +25,8 @@ class TopicController extends Controller
     public function save(Request $request)
     {
         $request->validate([
-            'subcategory_id' => 'required|exists:subcategories,id',
+            'category_id' => 'required|exists:categories,id',
+            'subcategory_id' => 'nullable|exists:subcategories,id',
             'name' => 'required|string|max:255',
         ]);
 
@@ -75,11 +76,18 @@ class TopicController extends Controller
     }
 
 
-public function addTopicForm()
-{
-    $categories = Category::all(); // Fetch all categories
-    return view('admin.topic.add', compact('categories'));
-}
+    public function addTopicForm()
+    {
+        $categories = Category::all();
+        return view('admin.topic.add', compact('categories'));
+    }
+
+
+    public function getSubcategoriesByCategory($category_id)
+    {
+        $subcategories = Subcategory::where('category_id', $category_id)->get();
+        return response()->json($subcategories);
+    }
 
 
 

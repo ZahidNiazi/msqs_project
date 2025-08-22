@@ -17,4 +17,9 @@ class Topic extends Model
     {
         return $this->hasMany(Mcq::class);
     }
+
+    public function category()
+    {
+        return $this->belongsTo(Category::class);
+    }
 }

@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('contents')
-<div class="container">
+<div class="container-fluid">
     <h2 class="mb-4">All Topics</h2>
 
     <a href="{{ route('admin.add.topic') }}" class="btn btn-primary mb-3">Add New Topic</a>

@@ -201,7 +201,7 @@ class McqsController extends Controller
             ->leftJoin('topics', 'mcqs.topic_id', '=', 'topics.id')
             ->select('mcqs.*', 'categories.name as category_name', 'topics.name as topic_name')
             ->orderBy('mcqs.id', 'desc')
-            ->get();
+            ->paginate(50);
 
         return view('admin.mcqs.index', compact('mcqs'));
     }

@@ -14,6 +14,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Frontend\McqController;
 use App\Http\Controllers\SubCategoryController;
 use App\Http\Controllers\AjaxController;
+use App\Http\Controllers\Frontend\AboutUsController as FrontendAboutUsController;
 
 
 
@@ -92,6 +93,11 @@ Route::group(['middleware' => 'Admin'], function () {
     })->name('dashboard');
 });
 
+// Frontend Pages
+
+Route::get('/about-us', [FrontendAboutUsController::class, 'index'])->name('frontend.aboutus');
+
+
 // Category Controller
 Route::controller(CategoryController::class)->prefix('category')->group(function () {
     Route::get('create', [CategoryController::class, 'index'])->name('All.Category');
@@ -125,16 +131,15 @@ Route::prefix('admin')->group(function () {
     Route::post('/topics/update/{id}', [TopicController::class, 'update'])->name('admin.update.topic');
     Route::get('/topics/delete/{id}', [TopicController::class, 'delete'])->name('admin.delete.topic');
 
-    // For dynamic dropdowns
+    // For Topics
     Route::get('/topics/by-subcategory/{id}', [TopicController::class, 'getBySubcategory']);
-    Route::get('/admin/topic/add', [TopicController::class, 'addTopicForm'])->name('admin.add.topic');
-Route::post('/admin/topic/save', [TopicController::class, 'saveTopic'])->name('admin.save.topic');
+    Route::get('/topic/add', [TopicController::class, 'addTopicForm'])->name('add.topic');
+Route::post('/topic/save', [TopicController::class, 'saveTopic'])->name('save.topic');
+Route::get('/subcategories/by-category/{id}', [TopicController::class, 'getSubcategoriesByCategory']);
+
 
 });
 // routes/web.php
-Route::prefix('admin')->name('admin.')->group(function () {
-    Route::resource('pages', \App\Http\Controllers\Admin\PageController::class);
-});
 
 Route::get('/get-subcategories/{category}', [SubCategoryController::class, 'getByCategory']);
 
@@ -161,7 +166,10 @@ Route::controller(McqsController::class)->prefix('mcqs')->group(function () {
     Route::post('/mcqs/import', 'import')->name('mcqs.import');
 });
 
-Route::resource('aboutus', App\Http\Controllers\Admin\AboutUsController::class);
+// Route::resource('aboutus', App\Http\Controllers\Admin\AboutUsController::class);
+Route::resource('aboutus', App\Http\Controllers\Admin\AboutUsController::class)->parameters([
+    'aboutus' => 'aboutus'
+]);
 //Braand Routes
 Route::controller(BrandController::class)->prefix('brand')->group(function () {
     Route::get('create', 'index')->name('all.brand');
