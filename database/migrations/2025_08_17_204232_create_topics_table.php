@@ -17,7 +17,6 @@ class CreateTopicsTable extends Migration
             $table->id();
             $table->unsignedBigInteger('subcategory_id');
             $table->string('name');
-            $table->timestamps();
             $table->foreign('subcategory_id')->references('id')->on('subcategories')->onDelete('cascade');
             $table->timestamps();
         });

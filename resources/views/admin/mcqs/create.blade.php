@@ -11,7 +11,7 @@
                 <div class="ibox-content">
                     <form  action="{{$action}}" method="POST" enctype="multipart/form-data">
                         @csrf
-                        @include('admin.customer.form')
+                        @include('admin.mcqs.form')
                     </form>
                 </div>
             </div>

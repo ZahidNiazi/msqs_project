@@ -22,4 +22,10 @@ class Topic extends Model
     {
         return $this->belongsTo(Category::class);
     }
+
+    // Access category through subcategory
+    public function getCategoryAttribute()
+    {
+        return $this->subcategory->category ?? null;
+    }
 }

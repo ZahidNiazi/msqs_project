@@ -12,6 +12,47 @@
         </div>
 
         <div class="card-body">
+            <!-- Import Section -->
+            <div class="row mb-4">
+                <div class="col-md-6">
+                    <div class="card border-primary">
+                        <div class="card-header bg-primary text-white">
+                            <h6 class="mb-0"><i class="fa fa-upload"></i> Import MCQs</h6>
+                        </div>
+                        <div class="card-body">
+                            <form action="{{ route('mcqs.import') }}" method="POST" enctype="multipart/form-data">
+                                @csrf
+                                <div class="form-group">
+                                    <label for="file">Select File (CSV, TXT, or JSON)</label>
+                                    <input type="file" class="form-control" name="file" accept=".csv,.txt,.json" required>
+                                    <small class="form-text text-muted">
+                                        Supported formats: CSV, TXT, JSON. Make sure your file has the correct column structure.
+                                    </small>
+                                </div>
+                                <button type="submit" class="btn btn-primary btn-sm">
+                                    <i class="fa fa-upload"></i> Import MCQs
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="card border-info">
+                        <div class="card-header bg-info text-white">
+                            <h6 class="mb-0"><i class="fa fa-info-circle"></i> Import Instructions</h6>
+                        </div>
+                        <div class="card-body">
+                            <h6>CSV/TXT Format:</h6>
+                            <p class="small mb-2">Columns: question, option_a, option_b, option_c, option_d, correct_option, category_id, subcategory_id, topic_id, explanation, title</p>
+
+                            <h6>JSON Format:</h6>
+                            <p class="small mb-0">Array of objects with the same field names as CSV format.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <!-- Search -->
             <form action="{{ route('mcqs.index') }}" method="GET" class="mb-3">
                 <div class="input-group">
@@ -35,15 +76,23 @@
                             <th>D</th>
                             <th>Correct</th>
                             <th>Category</th>
+                            <th>Subcategory</th>
+                            <th>Topic</th>
                             <th>Explanation</th>
                             <th>Title</th>
                             <th>Action</th>
                         </tr>
                     </thead>
                     <tbody>
-                        @forelse($mcqs as $mcq)
+                        @php
+                            $perPage = $mcqs->perPage();
+                            $currentPage = $mcqs->currentPage();
+                            $startIndex = ($currentPage - 1) * $perPage + 1;
+                        @endphp
+
+                        @forelse($mcqs as $index => $mcq)
                         <tr>
-                            <td>{{ $loop->iteration }}</td>
+                            <td>{{ $startIndex + $index }}</td>
                             <td class="truncate-cell" title="{{ $mcq->question }}">
                                 {{ Str::limit($mcq->question, 40) }}
                             </td>
@@ -54,11 +103,13 @@
                             <td>
                                 <span class="badge bg-success">{{ $mcq->correct_option }}</span>
                             </td>
-                            <td>{{ $mcq->category_name }}</td>
+                            <td>{{ $mcq->category_name ?? 'N/A' }}</td>
+                            <td>{{ $mcq->subcategory_name ?? 'N/A' }}</td>
+                            <td>{{ $mcq->topic_name ?? 'N/A' }}</td>
                             <td class="truncate-cell" title="{{ $mcq->explanation }}">
                                 {{ Str::limit($mcq->explanation, 40) }}
                             </td>
-                            <td>{{ $mcq->title }}</td>
+                            <td>{{ $mcq->title ?? 'N/A' }}</td>
                             <td>
                                 <div class="d-flex justify-content-center gap-2">
                                     <a href="{{ route('mcqs.edit', $mcq->id) }}"
@@ -78,7 +129,7 @@
                         </tr>
                         @empty
                         <tr>
-                            <td colspan="11" class="text-center text-muted">No Record Found!</td>
+                            <td colspan="12" class="text-center text-muted">No Record Found!</td>
                         </tr>
                         @endforelse
                     </tbody>
@@ -121,6 +172,10 @@
     margin: 0 3px;
     padding: .5rem .8rem;
     color: #0d6efd;
+}
+.card-header h6 {
+    margin-bottom: 0;
+    font-size: 14px;
 }
 </style>
 @endpush

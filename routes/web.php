@@ -133,12 +133,9 @@ Route::prefix('admin')->group(function () {
 
     // For Topics
     Route::get('/topics/by-subcategory/{id}', [TopicController::class, 'getBySubcategory']);
-    Route::get('/topic/add', [TopicController::class, 'addTopicForm'])->name('add.topic');
-Route::post('/topic/save', [TopicController::class, 'saveTopic'])->name('save.topic');
-Route::get('/subcategories/by-category/{id}', [TopicController::class, 'getSubcategoriesByCategory']);
-
-
+    Route::get('/subcategories/by-category/{id}', [TopicController::class, 'getSubcategoriesByCategory']);
 });
+
 // routes/web.php
 
 Route::get('/get-subcategories/{category}', [SubCategoryController::class, 'getByCategory']);
@@ -163,7 +160,7 @@ Route::controller(McqsController::class)->prefix('mcqs')->group(function () {
     Route::post('edit/{id}', 'update')->name('mcqs.update');
     Route::delete('delete/{id}', 'delete')->name('mcqs.delete');
     Route::delete('report/delete/{id}', 'rdelete')->name('mcqs.report.delete');
-    Route::post('/mcqs/import', 'import')->name('mcqs.import');
+    Route::post('/mcqs/import', [McqsController::class, 'import'])->name('mcqs.import');
 });
 
 // Route::resource('aboutus', App\Http\Controllers\Admin\AboutUsController::class);
@@ -232,8 +229,8 @@ Route::post('/update', [EmployeeController::class, 'update'])->name('update');
 Route::get('/crud', [EmployeeController::class, 'fetchAll'])->name('search');
 
 //////  Blog Category
-Route::controller(BlogCategory::class)->prefix('blogcategory')->group(function () {
-    Route::get('create', [BlogCategory::class, 'index'])->name('all.blogcategory');
+Route::controller(\App\Http\Controllers\BlogCategory::class)->prefix('blogcategory')->group(function () {
+    Route::get('create', [\App\Http\Controllers\BlogCategory::class, 'index'])->name('all.blogcategory');
     Route::get('add', 'add')->name('blogcategory.add');
     Route::post('save', 'save')->name('blogcategory.save');
     Route::get('edit/{id}', 'edit')->name('blogcategory.edit');
@@ -259,3 +256,18 @@ Route::get('/clear', function () {
 });
 
 Route::get('/admin/mcqs', [McqsController::class, 'search'])->name('mcqs.index');
+
+Route::get('/test-mcqs', function () {
+    $mcqCount = \App\Models\Mcq::count();
+    $categories = \App\Models\Category::count();
+    $subcategories = \App\Models\Subcategory::count();
+    $topics = \App\Models\Topic::count();
+
+    return response()->json([
+        'mcqs_count' => $mcqCount,
+        'categories_count' => $categories,
+        'subcategories_count' => $subcategories,
+        'topics_count' => $topics,
+        'sample_mcqs' => \App\Models\Mcq::take(5)->get(['id', 'question', 'category_id', 'subcategory_id', 'topic_id'])
+    ]);
+});

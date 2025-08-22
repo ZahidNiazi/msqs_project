@@ -50,7 +50,7 @@ class CategoryController extends Controller
         $validated = $request->validate([
             'name' => 'required|unique:categories|max:255',
             'title' => 'required|max:255',
-            'description' => 'nullable|max:1000',
+            'description' => 'nullable|max:5000',
             'file' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
         ], [
             'name.required' => 'Please input category name',
@@ -91,7 +91,7 @@ class CategoryController extends Controller
         $validated = $request->validate([
             'name' => 'required|max:255',
             'title' => 'required|max:255',
-            'description' => 'nullable|max:1000',
+            'description' => 'nullable|max:5000',
             'file' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
         ]);
 

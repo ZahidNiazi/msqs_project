@@ -15,6 +15,7 @@
             <tr>
                 <th>ID</th>
                 <th>Topic Name</th>
+                <th>Category</th>
                 <th>Subcategory</th>
                 <th>Actions</th>
             </tr>
@@ -24,6 +25,7 @@
                 <tr>
                     <td>{{ $topic->id }}</td>
                     <td>{{ $topic->name }}</td>
+                    <td>{{ $topic->category->name ?? 'N/A' }}</td>
                     <td>{{ $topic->subcategory->name ?? 'N/A' }}</td>
                     <td>
                         <a href="{{ route('admin.edit.topic', $topic->id) }}" class="btn btn-sm btn-warning">Edit</a>

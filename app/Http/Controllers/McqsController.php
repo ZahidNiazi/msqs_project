@@ -198,8 +198,9 @@ class McqsController extends Controller
     {
         $mcqs = DB::table('mcqs')
             ->leftJoin('categories', 'mcqs.category_id', '=', 'categories.id')
+            ->leftJoin('subcategories', 'mcqs.subcategory_id', '=', 'subcategories.id')
             ->leftJoin('topics', 'mcqs.topic_id', '=', 'topics.id')
-            ->select('mcqs.*', 'categories.name as category_name', 'topics.name as topic_name')
+            ->select('mcqs.*', 'categories.name as category_name', 'subcategories.name as subcategory_name', 'topics.name as topic_name')
             ->orderBy('mcqs.id', 'desc')
             ->paginate(50);
 
@@ -235,10 +236,11 @@ class McqsController extends Controller
     {
         $mcq = new Mcq();
         $categories = Category::all();
-        $topics = Topic::all();
+        $subcategories = collect(); // Empty collection initially
+        $topics = collect(); // Empty collection initially
         $action = route('mcqs.store');
 
-        return view('admin.mcqs.create', compact('mcq', 'categories', 'topics', 'action'));
+        return view('admin.mcqs.create', compact('mcq', 'categories', 'subcategories', 'topics', 'action'));
     }
 
     public function save(Request $request)
@@ -316,9 +318,18 @@ class McqsController extends Controller
         $mcq = DB::table('mcqs')->where('id', $id)->first();
         $action = route('mcqs.update', ['id' => $mcq->id]);
         $categories = Category::all();
-        $topics = Topic::all();
 
-        return view('admin.mcqs.create', compact('mcq', 'action', 'categories', 'topics'));
+        // Get subcategories for the current category
+        $subcategories = DB::table('subcategories')
+            ->where('category_id', $mcq->category_id)
+            ->get();
+
+        // Get topics for the current subcategory
+        $topics = DB::table('topics')
+            ->where('subcategory_id', $mcq->subcategory_id)
+            ->get();
+
+        return view('admin.mcqs.create', compact('mcq', 'action', 'categories', 'subcategories', 'topics'));
     }
 
     public function update($id, Request $request)
@@ -354,6 +365,57 @@ class McqsController extends Controller
     {
         DB::table('reports')->where('id', $id)->delete();
         toastr()->success('Report deleted successfully');
+        return redirect()->back();
+    }
+
+    public function import(Request $request)
+    {
+        // If a file (CSV or JSON) is uploaded
+        if ($request->hasFile('file')) {
+            $request->validate([
+                'file' => 'required|mimes:csv,txt,json',
+            ]);
+
+            $extension = $request->file('file')->getClientOriginalExtension();
+
+            if ($extension === 'csv' || $extension === 'txt') {
+                // CSV Import
+                Excel::import(new McqsImport, $request->file('file'));
+                toastr()->success('MCQs imported successfully from CSV');
+            } elseif ($extension === 'json') {
+                // JSON Import
+                $jsonData = file_get_contents($request->file('file')->getRealPath());
+                $data = json_decode($jsonData, true);
+
+                if (is_array($data)) {
+                    foreach ($data as $mcq) {
+                        DB::table('mcqs')->insert([
+                            'question'       => $mcq['question'] ?? '',
+                            'option_a'       => $mcq['option_a'] ?? '',
+                            'option_b'       => $mcq['option_b'] ?? '',
+                            'option_c'       => $mcq['option_c'] ?? '',
+                            'option_d'       => $mcq['option_d'] ?? '',
+                            'category_id'    => $mcq['category_id'] ?? null,
+                            'subcategory_id' => $mcq['subcategory_id'] ?? null,
+                            'topic_id'       => $mcq['topic_id'] ?? null,
+                            'correct_option' => $mcq['correct_option'] ?? '',
+                            'explanation'    => $mcq['explanation'] ?? '',
+                            'title'          => $mcq['title'] ?? null,
+                            'image'          => $mcq['image'] ?? null,
+                            'created_at'     => now(),
+                            'updated_at'     => now(),
+                        ]);
+                    }
+                    toastr()->success('MCQs imported successfully from JSON');
+                } else {
+                    toastr()->error('Invalid JSON format.');
+                }
+            }
+
+            return redirect()->route('All.mcqs');
+        }
+
+        toastr()->error('Please select a file to import.');
         return redirect()->back();
     }
 }

@@ -360,10 +360,16 @@
                     </div>
                 </div>
                 <!-- Question 1 -->
+                @php
+                    $perPage = $mcqs->perPage();
+                    $currentPage = $mcqs->currentPage();
+                    $startIndex = ($currentPage - 1) * $perPage + 1;
+                @endphp
+
                 @foreach ($mcqs as $index => $mcq)
-                    <section class="question-section" tabindex="0" aria-label="Question {{ $index + 1 }}">
+                    <section class="question-section" tabindex="0" aria-label="Question {{ $startIndex + $index }}">
                         <div class="flex items-start space-x-4 mb-4">
-                            <div class="question-number">{{ $index + 1 }}</div>
+                            <div class="question-number">{{ $startIndex + $index }}</div>
                             <div class="question-text">
                                 {{ $mcq->question }}
                             </div>

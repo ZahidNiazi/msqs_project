@@ -16,30 +16,28 @@
                 <div class="card-body">
                     <div class="form-group">
                         <label for="name">Category Name</label>
-                        <input type="text" class="form-control" id="name" name="name" 
+                        <input type="text" class="form-control" id="name" name="name"
                                value="{{ old('name', $category->name ?? '') }}" required>
                     </div>
 
                     <div class="form-group">
                         <label for="title">Title</label>
-                        <input type="text" class="form-control" id="title" name="title" 
+                        <input type="text" class="form-control" id="title" name="title"
                                value="{{ old('title', $category->title ?? '') }}" required>
                     </div>
 
                     <div class="form-group">
                         <label for="description">Description</label>
-                               <textarea type="text" class="form-control" id="description" name="description"  cols="30" rows="10" required
-                                   value="{{ old('description', $category->description ?? '') }}">
-                               </textarea>
+                        <textarea class="form-control" id="description" name="description" rows="10">{{ old('description', $category->description ?? '') }}</textarea>
                     </div>
 
                     <div class="form-group">
                         <label for="file">Category Image</label>
                         <input type="file" class="form-control-file" id="file" name="file">
-                        
+
                         @if(isset($category) && $category->file)
                             <div class="mt-2">
-                                <img src="{{ asset($category->file) }}" alt="Current Image" height="60">
+                                <img src="{{ asset('assets/banner/' . $category->file) }}" alt="Current Image" height="60">
                             </div>
                         @endif
                     </div>
@@ -53,5 +51,54 @@
         </div>
     </div>
 </form>
+
+<!-- CKEditor CDN -->
+<script src="https://cdn.ckeditor.com/ckeditor5/40.1.0/classic/ckeditor.js"></script>
+
+<script>
+    ClassicEditor
+        .create(document.querySelector('#description'), {
+            toolbar: {
+                items: [
+                    'heading',
+                    '|',
+                    'bold',
+                    'italic',
+                    'link',
+                    'bulletedList',
+                    'numberedList',
+                    '|',
+                    'outdent',
+                    'indent',
+                    '|',
+                    'blockQuote',
+                    'insertTable',
+                    'undo',
+                    'redo'
+                ]
+            },
+            language: 'en',
+            image: {
+                toolbar: [
+                    'imageTextAlternative',
+                    'imageStyle:full',
+                    'imageStyle:side'
+                ]
+            },
+            table: {
+                contentToolbar: [
+                    'tableColumn',
+                    'tableRow',
+                    'mergeTableCells'
+                ]
+            }
+        })
+        .then(editor => {
+            console.log('CKEditor initialized successfully');
+        })
+        .catch(error => {
+            console.error('Error initializing CKEditor:', error);
+        });
+</script>
 @endsection
 

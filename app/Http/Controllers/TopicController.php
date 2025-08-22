@@ -12,21 +12,21 @@ class TopicController extends Controller
 {
     public function index()
     {
-        $topics = Topic::with('subcategory')->paginate(10);
+        $topics = Topic::with(['subcategory.category'])->paginate(10);
         return view('admin.topic.index', compact('topics'));
     }
 
     public function add()
     {
-        $subcategories = Subcategory::all();
-        return view('admin.topic.add', compact('subcategories'));
+        $categories = Category::all();
+        return view('admin.topic.add', compact('categories'));
     }
 
     public function save(Request $request)
     {
         $request->validate([
             'category_id' => 'required|exists:categories,id',
-            'subcategory_id' => 'nullable|exists:subcategories,id',
+            'subcategory_id' => 'required|exists:subcategories,id',
             'name' => 'required|string|max:255',
         ]);
 
@@ -41,13 +41,14 @@ class TopicController extends Controller
     public function edit($id)
     {
         $topic = Topic::findOrFail($id);
-        $subcategories = Subcategory::all();
-        return view('admin.topic.edit', compact('topic', 'subcategories'));
+        $categories = Category::all();
+        return view('admin.topic.edit', compact('topic', 'categories'));
     }
 
     public function update(Request $request, $id)
     {
         $request->validate([
+            'category_id' => 'required|exists:categories,id',
             'subcategory_id' => 'required|exists:subcategories,id',
             'name' => 'required|string|max:255',
         ]);
@@ -75,21 +76,31 @@ class TopicController extends Controller
         return response()->json($topics);
     }
 
-
     public function addTopicForm()
     {
         $categories = Category::all();
         return view('admin.topic.add', compact('categories'));
     }
 
+    public function saveTopic(Request $request)
+    {
+        $request->validate([
+            'subcategory_id' => 'required|exists:subcategories,id',
+            'name' => 'required|string|max:255',
+        ]);
+
+        Topic::create([
+            'subcategory_id' => $request->subcategory_id,
+            'name' => $request->name,
+        ]);
+
+        return redirect()->route('admin.all.topic')->with('success', 'Topic added successfully');
+    }
 
     public function getSubcategoriesByCategory($category_id)
     {
         $subcategories = Subcategory::where('category_id', $category_id)->get();
         return response()->json($subcategories);
     }
-
-
-
 }
 

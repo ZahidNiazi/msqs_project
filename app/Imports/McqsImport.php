@@ -11,8 +11,9 @@ class McqsImport implements ToModel, WithHeadingRow
     public function model(array $row)
     {
         return new Mcq([
-            'category_id'     => $row['category_id'],
-            'subcategory_id'  => $row['subcategory_id'],
+            'category_id'     => $row['category_id'] ?? null,
+            'subcategory_id'  => $row['subcategory_id'] ?? null,
+            'topic_id'        => $row['topic_id'] ?? null,
             'question'        => $row['question'],
             'option_a'        => $row['option_a'],
             'option_b'        => $row['option_b'],
@@ -22,6 +23,8 @@ class McqsImport implements ToModel, WithHeadingRow
             'explanation'     => $row['explanation'],
             'title'           => $row['title'] ?? null,
             'image'           => $row['image'] ?? null,
+            'created_at'      => now(),
+            'updated_at'      => now(),
         ]);
     }
 }
