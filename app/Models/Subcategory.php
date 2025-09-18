@@ -9,7 +9,7 @@ class Subcategory extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['category_id','name']; // add more fields if needed
+    protected $fillable = ['category_id', 'name']; // add more fields if needed
 
 
     public function category()
@@ -25,11 +25,13 @@ class Subcategory extends Model
         return $this->hasMany(Mcq::class);
     }
 
-    public function product(){
+    public function product()
+    {
         return $this->belongsTo(Product::class);
     }
 
-    public function brand(){
+    public function brand()
+    {
         return $this->belongsTo(Brand::class);
     }
 
@@ -42,5 +44,4 @@ class Subcategory extends Model
     {
         return $this->hasMany(Topic::class);
     }
-
 }

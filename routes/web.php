@@ -106,7 +106,12 @@ Route::controller(CategoryController::class)->prefix('category')->group(function
     Route::get('edit/{id}', 'edit')->name('category.edit');
     Route::post('edit/{id}', 'update')->name('category.update');
     Route::get('delete/{id}', 'delete')->name('category.delete');
+    Route::get('category/import',  'importForm')->name('category.import.form');
+    Route::post('category/import',  'importJson')->name('category.import.json');
 });
+
+
+
 
 
 // SubCategory Controller routes
@@ -118,6 +123,9 @@ Route::controller(SubCategoryController::class)->prefix('subcategory')->group(fu
     Route::post('edit/{id}', 'update')->name('subcategory.update'); // Update subcategory
     Route::get('delete/{id}', 'delete')->name('subcategory.delete'); // Delete subcategory
     Route::get('/subcategories/{category_id}', 'getByCategory');
+    Route::get('import', 'importForm')->name('subcategory.import.form');
+    Route::post('import', 'importJson')->name('subcategory.import.json');
+
 });
 
 Route::get('/get-subcategories/{category}', [SubCategoryController::class, 'getByCategory']);
@@ -256,6 +264,13 @@ Route::get('/clear', function () {
 });
 
 Route::get('/admin/mcqs', [McqsController::class, 'search'])->name('mcqs.index');
+// Import MCQs
+Route::get('/admin/mcqs/import', [McqsController::class, 'showImportForm'])->name('mcqs.import.form');
+Route::post('/admin/mcqs/import', [McqsController::class, 'importByEachCategory'])->name('mcqs.import');
+
+// AJAX Endpoints
+Route::get('/get-subcategories/{id}', [McqsController::class, 'getSubcategories']);
+Route::get('/get-topics/{id}', [McqsController::class, 'getTopics']);
 
 Route::get('/test-mcqs', function () {
     $mcqCount = \App\Models\Mcq::count();

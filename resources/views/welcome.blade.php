@@ -92,58 +92,6 @@
                         </div>
                     </div>
                 </div>
-                {{-- <div class="bg-white p-6 rounded shadow mt-4">
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        @foreach ($categories as $category)
-                            @php
-                                $colors = [
-                                    'red',
-                                    'blue',
-                                    'green',
-                                    'pink',
-                                    'purple',
-                                    'orange',
-                                    'teal',
-                                    'yellow',
-                                    'indigo',
-                                    'gray',
-                                ];
-                                $icons = [
-                                    'fa-globe',
-                                    'fa-flag',
-                                    'fa-newspaper',
-                                    'fa-mosque',
-                                    'fa-spell-check',
-                                    'fa-flask',
-                                    'fa-language',
-                                    'fa-calculator',
-                                    'fa-desktop',
-                                    'fa-brain',
-                                ];
-                                $color = $colors[$loop->index % count($colors)];
-                                $icon = $icons[$loop->index % count($icons)];
-                            @endphp
-
-                            @if ($category->subcategories->count() > 0)
-                                @foreach ($category->subcategories as $subcategory)
-                                    <div
-                                        class="flex items-center bg-{{ $color }}-500 text-white p-4 rounded hover:bg-{{ $color }}-600 transition duration-300 cursor-pointer">
-                                        <i class="fas {{ $icon }} mr-3"></i>
-                                        <span class="flex-1">{{ $subcategory->name }}</span>
-                                        <i class="fas fa-arrow-right"></i>
-                                    </div>
-                                @endforeach
-                            @else
-                                <div
-                                    class="flex items-center bg-{{ $color }}-500 text-white p-4 rounded hover:bg-{{ $color }}-600 transition duration-300 cursor-pointer">
-                                    <i class="fas {{ $icon }} mr-3"></i>
-                                    <span class="flex-1">{{ $category->name }}</span>
-                                    <i class="fas fa-arrow-right"></i>
-                                </div>
-                            @endif
-                        @endforeach
-                    </div>
-                </div> --}}
                 <div class="bg-white p-6 rounded shadow mt-4">
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         @foreach ($categories as $category)

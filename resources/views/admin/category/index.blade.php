@@ -22,6 +22,9 @@
 
 
         <div class="card-body">
+            <a href="{{ route('category.import.form') }}" class="btn btn-info mb-3 ml-2">
+    <i class="fas fa-file-upload"></i> Import Categories
+</a>
             <a href="{{ route('category.add') }}" class="btn btn-primary mb-3">Add Category</a>
             <div class="table-responsive">
                 <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
@@ -60,7 +63,7 @@
                                     <a href="{{ url('category/delete/' . $row->id) }}" class="btn btn-danger">Delete</a>
 
                                 </td>
-                                
+
                             </tr>
                             @empty
                         <tr>

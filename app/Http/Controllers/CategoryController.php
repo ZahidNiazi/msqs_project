@@ -6,6 +6,7 @@ use App\Models\Subcategory;
 use App\Models\Product;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Validator;
 
 
 
@@ -131,5 +132,110 @@ class CategoryController extends Controller
         $subcategories = Subcategory::where('category_id', $id)->get(['id', 'name']);
         return response()->json($subcategories);
     }
+
+    // Show simple upload form (or you can include upload form in index blade)
+public function importForm()
+{
+    return view('admin.category.import'); // we'll create this blade below
+}
+
+public function importJson(Request $request)
+{
+    // Validate uploaded file
+    $request->validate([
+        'json_file' => 'required|file|mimes:json,txt|max:10240', // up to 10MB
+    ], [
+        'json_file.required' => 'Please upload a JSON file.',
+    ]);
+
+    $file = $request->file('json_file');
+    $content = file_get_contents($file->getRealPath());
+    $data = json_decode($content, true);
+
+    if (json_last_error() !== JSON_ERROR_NONE) {
+        return redirect()->back()->withErrors(['json_file' => 'Invalid JSON file: ' . json_last_error_msg()]);
+    }
+
+    if (!is_array($data)) {
+        return redirect()->back()->withErrors(['json_file' => 'JSON structure must be an array of category objects.']);
+    }
+
+    $inserted = 0;
+    $skipped = 0;
+    $errors = [];
+
+    DB::beginTransaction();
+    try {
+        foreach ($data as $index => $item) {
+            // Basic shape validation for each item
+            $validator = Validator::make($item, [
+                'name' => 'required|string|max:255',
+                'title' => 'required|string|max:255',
+                'description' => 'nullable|string|max:5000',
+                'image' => 'nullable|string|url',
+            ]);
+
+            if ($validator->fails()) {
+                $errors[] = "Row {$index}: " . implode(', ', $validator->errors()->all());
+                $skipped++;
+                continue;
+            }
+
+            // Skip if category with same name exists (change behavior to update if wanted)
+            $exists = DB::table('categories')->where('name', $item['name'])->first();
+            if ($exists) {
+                $skipped++;
+                continue;
+            }
+
+            $fileName = null;
+
+            // If JSON provides image_url, try to download it
+            if (!empty($item['image'])) {
+                try {
+                    // attempt to fetch remote image
+                    $imgContents = @file_get_contents($item['image']);
+                    if ($imgContents !== false) {
+                        $ext = pathinfo(parse_url($item['image'], PHP_URL_PATH), PATHINFO_EXTENSION) ?: 'jpg';
+                        $ext = preg_replace('/[^a-zA-Z0-9]/', '', $ext) ?: 'jpg';
+                        $fileName = Str::slug($item['name']) . '_' . time() . '.' . $ext;
+                        file_put_contents(public_path('assets/banner/' . $fileName), $imgContents);
+                    }
+                } catch (\Exception $e) {
+                    // ignore, proceed without image
+                }
+            }
+
+            // If JSON provides image_base64 (data URI or raw base64)
+
+            // insert category
+            DB::table('categories')->insert([
+                'name' => $item['name'],
+                'title' => $item['title'],
+                'description' => $item['description'] ?? null,
+                'file' => $fileName,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+
+            $inserted++;
+        }
+
+        DB::commit();
+    } catch (\Exception $e) {
+        DB::rollBack();
+        return redirect()->back()->withErrors(['json_file' => 'Import failed: ' . $e->getMessage()]);
+    }
+
+    $msg = "Import finished. Inserted: {$inserted}. Skipped: {$skipped}.";
+    if (count($errors) > 0) {
+        // attach a small report in session (you can store more if needed)
+        session()->flash('import_errors', $errors);
+    }
+
+    toastr()->success($msg);
+    return redirect()->route('All.Category');
+}
+
 
 }

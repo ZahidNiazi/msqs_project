@@ -17,7 +17,7 @@ class Mcq extends Model
 
     public function subCategory()
     {
-        return $this->belongsTo(SubCategory::class);
+        return $this->belongsTo(Subcategory::class);
     }
 
     public function topic()

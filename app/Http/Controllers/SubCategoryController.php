@@ -79,5 +79,39 @@ class SubCategoryController extends Controller
         return redirect()->route('all.subcategory')->with('success', 'Subcategory deleted successfully');
     }
 
+    // Show import form
+    public function importForm()
+    {
+        $categories = Category::all();
+        return view('admin.subcategory.import', compact('categories'));
+    }
+
+    // Handle JSON upload
+    public function importJson(Request $request)
+    {
+        $request->validate([
+            'json_file' => 'required|file|mimes:json,txt',
+        ]);
+
+        $jsonData = json_decode(file_get_contents($request->file('json_file')), true);
+
+
+        if (!$jsonData || !is_array($jsonData)) {
+            return back()->with('error', 'Invalid JSON format.');
+        }
+
+        foreach ($jsonData as $item) {
+            if (isset($item['name'], $item['category_id'])) {
+                SubCategory::updateOrCreate(
+                    ['name' => $item['name'], 'category_id' => $item['category_id']],
+                    ['name' => $item['name']]
+                );
+            }
+        }
+
+        return redirect()->route('all.subcategory')->with('success', 'Subcategories imported successfully.');
+    }
+
+
 
 }

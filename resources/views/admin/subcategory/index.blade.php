@@ -5,6 +5,10 @@
     <h1 class="mb-4">All SubCategories</h1>
 
     <a href="{{ route('subcategory.add') }}" class="btn btn-success mb-3">Add New SubCategory</a>
+    <a href="{{ route('subcategory.import.form') }}" class="btn btn-info mb-3 ml-2">
+    <i class="fas fa-file-upload"></i> Import SubCategories
+    </a>
+
 
     @if(session('success'))
         <div class="alert alert-success">{{ session('success') }}</div>

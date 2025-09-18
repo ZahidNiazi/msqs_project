@@ -15,6 +15,7 @@ class McqController extends Controller
     public function index($cat = null)
     {
         $categories = Category::with('subcategories')->whereNull('parent_id')->get();
+        $categories = \App\Models\Category::with('subcategories')->get();
         $selectedCategory = null;
 
         try {

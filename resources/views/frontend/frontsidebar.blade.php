@@ -1,23 +1,49 @@
+<!-- resources/views/components/sidebar-categories.blade.php -->
+
 <!-- Font Awesome for icons -->
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
-<div class="sidebar bg-light shadow-sm rounded p-3">
+<div class="sidebar bg-white shadow-sm rounded p-3">
     <div class="mcqs-details">
         <h6 class="fw-bold text-primary mb-2">
             <i class="fa-solid fa-list"></i> LATEST MENU
         </h6>
         <hr class="mt-1 mb-2">
+
+        @php $initialLimit = 20; @endphp
+
         <ul class="list-group" id="category-list">
-            @foreach ($categories as $category)
-                <li class="list-group-item border-0 px-0">
-                    <a class="category-select d-flex align-items-center justify-content-between text-dark py-2 px-2 rounded hover-bg"
-                       data-id="{{ $category->id }}" href="#">
-                        <span><i class="fa-solid fa-folder-open me-2 text-warning"></i>{{ $category->name }}</span>
-                        <i class="fa-solid fa-chevron-down dropdown-arrow"></i>
-                    </a>
-                    <ul class="list-group subcategory-list ps-3" id="sub-{{ $category->id }}" style="display:none;"></ul>
-                </li>
+            @foreach ($categories as $index => $category)
+                @if($index < $initialLimit)
+                    <li class="list-group-item border-0 px-0">
+                        <a class="category-select d-flex align-items-center justify-content-between text-dark py-2 px-2 rounded hover-bg"
+                           data-id="{{ $category->id }}" href="#">
+                            <span><i class="fa-solid fa-folder-open me-2 text-warning"></i>{{ $category->name }}</span>
+                            <i class="fa-solid fa-chevron-down dropdown-arrow"></i>
+                        </a>
+                        <ul class="list-group subcategory-list ps-3" id="sub-{{ $category->id }}" style="display:none;"></ul>
+                    </li>
+                @else
+                    <li class="list-group-item border-0 px-0 more-category-item" style="display: none;">
+                        <a class="category-select d-flex align-items-center justify-content-between text-dark py-2 px-2 rounded hover-bg"
+                           data-id="{{ $category->id }}" href="#">
+                            <span><i class="fa-solid fa-folder-open me-2 text-warning"></i>{{ $category->name }}</span>
+                            <i class="fa-solid fa-chevron-down dropdown-arrow"></i>
+                        </a>
+                        <ul class="list-group subcategory-list ps-3" id="sub-{{ $category->id }}" style="display:none;"></ul>
+                    </li>
+                @endif
             @endforeach
+
+            @if($categories->count() > $initialLimit)
+                <li class="list-group-item border-0 px-0 text-center" id="show-more-control" style="cursor: pointer;">
+                    <a class="d-inline-flex align-items-center justify-content-center text-primary py-2 px-3" id="toggle-more">
+                        <i class="fa-solid fa-spinner me-2" id="toggle-spinner" aria-hidden="true" style="display:none; width:1rem;"></i>
+                        <i class="fa-solid fa-chevron-down me-2" id="toggle-arrow"></i>
+                        <span id="toggle-label">Show more</span>
+                    </a>
+                </li>
+            @endif
         </ul>
     </div>
 </div>
@@ -36,15 +62,21 @@
     .list-group-item {
         background: transparent;
     }
+    .more-category-item { display: none; }
+    /* Ensure spinner space is reserved */
+    #toggle-spinner { width: 1rem; }
 </style>
 
+<!-- jQuery (required) -->
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
 <script>
 $(document).ready(function () {
+    // Remove previous handlers to avoid duplicate binding when blade included multiple times
     $(document).off('click', '.category-select');
     $(document).off('click', '.subcategory-select');
 
-    // Category click with auto close for others
+    // Category click with auto-close for others
     $(document).on('click', '.category-select', function (e) {
         e.preventDefault();
         var categoryId = $(this).data('id');
@@ -61,6 +93,7 @@ $(document).ready(function () {
             return;
         }
 
+        // Fetch subcategories
         $.ajax({
             url: '/get-subcategories/' + categoryId,
             method: 'GET',
@@ -83,11 +116,16 @@ $(document).ready(function () {
                 }
                 subList.slideDown(150);
                 arrow.addClass('rotated');
+            },
+            error: function () {
+                subList.empty().append('<li class="list-group-item border-0 ps-4 text-danger">Failed to load</li>');
+                subList.slideDown(150);
+                arrow.addClass('rotated');
             }
         });
     });
 
-    // Subcategory click with auto close for others
+    // Subcategory click with auto-close for others
     $(document).on('click', '.subcategory-select', function (e) {
         e.preventDefault();
         var subcatId = $(this).data('id');
@@ -103,6 +141,7 @@ $(document).ready(function () {
             return;
         }
 
+        // Fetch topics
         $.ajax({
             url: '/get-topics/' + subcatId,
             method: 'GET',
@@ -129,8 +168,57 @@ $(document).ready(function () {
                 }
                 topicList.slideDown(150);
                 arrow.addClass('rotated');
+            },
+            error: function () {
+                topicList.empty().append('<li class="list-group-item border-0 ps-4 text-danger">Failed to load</li>');
+                topicList.slideDown(150);
+                arrow.addClass('rotated');
             }
         });
     });
+
+    // Show-more control logic
+    var showingMore = false;
+    var $moreItems = $('.more-category-item');
+
+    $('#toggle-more').on('click', function (e) {
+        e.preventDefault();
+
+        var $spinner = $('#toggle-spinner');
+        var $arrow = $('#toggle-arrow');
+        var $label = $('#toggle-label');
+
+        if (!showingMore) {
+            // Start spinner, wait 1s, then reveal
+            $spinner.show().addClass('fa-spin');
+            $arrow.hide();
+            $label.text('Loading...');
+            setTimeout(function () {
+                $moreItems.slideDown(180);
+                $spinner.removeClass('fa-spin').hide();
+                $arrow.show().addClass('rotated');
+                $label.text('Show less');
+                showingMore = true;
+            }, 1000);
+        } else {
+            // hide immediately (no delay)
+            $moreItems.slideUp(150, function () {
+                $arrow.removeClass('rotated');
+            });
+            $spinner.hide().removeClass('fa-spin');
+            $arrow.show();
+            $label.text('Show more');
+            showingMore = false;
+
+            // close any open nested lists inside hidden items
+            $moreItems.find('.subcategory-list, .topic-list').slideUp(0);
+            $moreItems.find('.dropdown-arrow').removeClass('rotated');
+        }
+    });
+
+    // Hide control if no hidden items exist
+    if ($moreItems.length === 0) {
+        $('#show-more-control').hide();
+    }
 });
 </script>
