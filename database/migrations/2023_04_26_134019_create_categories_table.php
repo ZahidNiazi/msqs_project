@@ -13,7 +13,7 @@ class CreateCategoriesTable extends Migration
             $table->string('name', 50);
             $table->string('title', 255)->nullable();
             $table->string('file', 255)->nullable();
-            $table->string('description', 100)->nullable();
+            $table->string('description',250)->nullable();
             $table->unsignedBigInteger('parent_id')->nullable();
             $table->foreign('parent_id')->references('id')->on('categories')->onDelete('cascade');
             $table->timestamps();
