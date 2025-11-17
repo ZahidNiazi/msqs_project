@@ -1,19 +1,108 @@
-/node_modules
+# ============================
+# Laravel Default Ignores
+# ============================
+
+/vendor/
+/node_modules/
+
+# Laravel environment files
+.env
+.env.*
+.env.backup
+
+# Laravel storage & cache
+/storage/*.key
+/storage/app/*
+/storage/framework/*
+/storage/logs/*
+
+# Ignore public storage symlink (regenerated)
+public/storage
+
+# Laravel Mix / Vite
 /public/hot
 /public/storage
-/storage/*.key
-/vendor
-.env
-.env.backup
+/public/build
+/public/js/*
+/public/css/*
+/public/mix-manifest.json
+/public/vite.manifest.json
+
+# PHPUnit
 .phpunit.result.cache
-docker-compose.override.yml
-Homestead.json
-Homestead.yaml
+
+# Composer
+composer.lock
+composer.phar
+
+# NPM/Yarn/Pnpm logs
 npm-debug.log
 yarn-error.log
+pnpm-debug.log
+
+# IDE / Editors
 /.idea
 /.vscode
+*.swp
+*.swo
+
+# OS system files
+.DS_Store
+Thumbs.db
+
+# Docker
+docker-compose.override.yml
+
+# Homestead
+Homestead.json
+Homestead.yaml
+
+# ============================
+# Custom Files You Requested
+# ============================
+
+# ZIPs or backup files
 mcqslogic_cpanel_latest.zip
-mcqslogic_cpanel_latest.zip
-mcqslogic_cpanel_latest.zip
-mcqslogic_cpanel_latest.zip
+*.zip
+*.tar.gz
+
+# Static export or scraped files
+public/POS_backup_*.sql
+*.sql
+
+# Logs
+*.log
+
+# Local uploads backup
+/uploads/
+public/uploads/
+storage/uploads/
+
+# ============================
+# Framework Cache / Temp Files
+# ============================
+
+/bootstrap/cache/*.php
+/bootstrap/cache/packages.php
+/bootstrap/cache/services.php
+/bootstrap/cache/*.json
+
+# Cache files
+*.cache
+
+# ============================
+# Security (Do NOT upload)
+# ============================
+
+/keys/
+/certs/
+*.pem
+*.crt
+*.key
+
+# ============================
+# Optional: Ignore images (if large)
+# Uncomment if needed
+# public/images/
+# storage/app/public/images/
+
