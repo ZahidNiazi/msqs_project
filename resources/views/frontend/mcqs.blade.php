@@ -196,29 +196,41 @@
                     {{ $selectedCategory->title ?? 'All Categories' }} MCQs
                 </h2>
 
-                <!-- Notes section (kept from your original) -->
-                <div class="notes-section">
-                    <h3 class="flex items-center gap-2">
-                        <i class="fas fa-book text-green-600"></i>
-                        Topic Notes: {{ $selectedCategory->title ?? 'All Categories' }}
-                    </h3>
-                    <p>{{ $selectedCategory->description ?? 'General Description' }}</p>
-
-                    <div class="notes-page" data-page="2">
-                        <h4>Plato</h4>
-                        <ul>
-                            <li><strong>Biography:</strong> Ancient Greek philosopher (427–347 BCE), student of Socrates and teacher of Aristotle, founder of the Academy in Athens.</li>
-                            <li><strong>Important Ideas:</strong>
-                                <ul>
-                                    <li>Theory of Forms</li>
-                                    <li>Philosopher-King</li>
-                                    <li>Ideal State</li>
-                                </ul>
-                            </li>
-                        </ul>
+                <!-- Dynamic Notes Section -->
+                @if(isset($mcq))
+                    <div class="notes-section">
+                        <h3 class="flex items-center gap-2">
+                            <i class="fas fa-book text-green-600"></i>
+                            @if($mcq->title)
+                                {{ strip_tags($mcq->title) }}
+                            @else
+                                Topic Notes: {{ strip_tags($selectedCategory->title ?? 'MCQ Details') }}
+                            @endif
+                        </h3>
+                        
+                        @if($mcq->explanation)
+                            <div class="mt-3">
+                                {!! nl2br(e(strip_tags($mcq->explanation))) !!}
+                            </div>
+                        @else
+                            <p class="text-gray-500 italic">No detailed explanation available for this question.</p>
+                        @endif
+                        
+                        @if($mcq->image)
+                            <div class="mt-3">
+                                <img src="{{ asset('storage/' . $mcq->image) }}" alt="MCQ Image" class="max-w-full h-auto rounded-lg shadow">
+                            </div>
+                        @endif
                     </div>
-                    <!-- Additional notes pages could be included -->
-                </div>
+                @elseif(isset($mcqs) && $mcqs->count() > 0)
+                    <div class="notes-section">
+                        <h3 class="flex items-center gap-2">
+                            <i class="fas fa-book text-green-600"></i>
+                            {{ strip_tags($selectedCategory->title ?? 'MCQ Collection') }}
+                        </h3>
+                        <p>{{ strip_tags($selectedCategory->description ?? 'Browse through the collection of MCQs below') }}</p>
+                    </div>
+                @endif
 
                 @php
                     $perPage = $mcqs->perPage();
@@ -304,6 +316,17 @@
 
         <!-- Right Sidebar (kept from your structure) -->
         <aside class="w-full md:w-72 flex-shrink-0 hidden md:block">
+            
+            <!-- Mock Test Section -->
+            <div class="bg-gradient-to-r from-green-600 to-green-400 text-white p-6 rounded-lg shadow-lg mb-6">
+                <h3 class="text-lg font-bold mb-2 flex items-center gap-2">
+                    <i class="fas fa-star text-yellow-300"></i> Mock Test
+                </h3>
+                <p class="text-sm mb-4">Test your knowledge Now</p>
+                <a href="#" class="block text-center bg-yellow-300 text-green-900 px-4 py-2 rounded-full font-semibold hover:bg-yellow-400 transition">
+                    Start
+                </a>
+            </div>
             <div class="mb-3">
                 @include('frontend.frontsidebar')
             </div>

@@ -2,13 +2,13 @@
 @section('content')
     <!-- Hero Banner -->
 
-        <section class="w-full max-w-7xl mx-auto pt-10">
+        {{-- <section class="w-full max-w-7xl mx-auto pt-10">
             <img
                 src="{{ asset('img/banner2.png') }}"
                 alt="Banner"
                 class="w-full h-[200px] object-cover rounded-lg shadow-md"
             >
-        </section>
+        </section> --}}
     <section
         class="bg-gradient-to-r from-green-700 via-blue-600 to-purple-600 text-white py-12 px-6 flex flex-col sm:flex-row items-center justify-between max-w-7xl mx-auto mt-6 rounded-lg shadow-md">
         <div class="font-bold text-2xl sm:text-3xl flex items-center">
