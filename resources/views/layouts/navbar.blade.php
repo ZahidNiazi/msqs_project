@@ -139,6 +139,13 @@
 
       <div class="topbar-divider d-none d-sm-block"></div>
 
+       <!-- Nav Item - User Information -->
+      <li class="nav-item">
+        <a class="nav-link" href="{{ url('/') }}" target="_blank" title="View Frontend">
+          <i class="fas fa-globe fa-fw text-success"></i>
+          <span class="d-none d-lg-inline text-gray-600 small"></span>
+        </a>
+      </li>
       <!-- Nav Item - User Information -->
       <li class="nav-item dropdown no-arrow">
         <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
@@ -158,9 +165,7 @@
           </a>
         </div>
       </li>
-
     </ul>
-
   </nav>
 
 

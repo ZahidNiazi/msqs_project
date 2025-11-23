@@ -78,7 +78,7 @@
             <div class="bg-white py-2 collapse-inner rounded shadow-sm">
                 <a class="collapse-item" href="{{ route('mcqs.add') }}"><i class="fas fa-plus-circle text-success"></i> Add Mcq</a>
                 <a class="collapse-item" href="{{ route('All.mcqs') }}"><i class="fas fa-list text-primary"></i> View Mcqs</a>
-                <a class="collapse-item" href="{{ route('mcqs.import.form') }}">
+                <a class="collapse-item" href="{{ route('mcqs.import.form') }} ">
                 <i class="fas fa-file-upload text-info"></i> Import MCQs
             </a>
             </div>
