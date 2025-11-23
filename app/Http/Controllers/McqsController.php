@@ -256,7 +256,51 @@ class McqsController extends Controller
         return response()->json($topics);
     }
 
-        public function importByEachCategory(Request $request)
+    //     public function importByEachCategory(Request $request)
+    // {
+    //     $request->validate([
+    //         'file' => 'required|mimes:json',
+    //         'category_id' => 'required|exists:categories,id',
+    //         'subcategory_id' => 'required|exists:subcategories,id',
+    //         'topic_id' => 'required|exists:topics,id',
+    //     ]);
+
+    //     $categoryId = $request->category_id;
+    //     $subcategoryId = $request->subcategory_id;
+    //     $topicId = $request->topic_id;
+
+    //     $jsonData = file_get_contents($request->file('file')->getRealPath());
+    //     $data = json_decode($jsonData, true);
+
+    //     if (!is_array($data)) {
+    //         toastr()->error('Invalid JSON format.');
+    //         return redirect()->back();
+    //     }
+
+    //     foreach ($data as $mcq) {
+    //         DB::table('mcqs')->insert([
+    //             'question'       => $mcq['question'] ?? '',
+    //             'option_a'       => $mcq['option_a'] ?? '',
+    //             'option_b'       => $mcq['option_b'] ?? '',
+    //             'option_c'       => $mcq['option_c'] ?? '',
+    //             'option_d'       => $mcq['option_d'] ?? '',
+    //             'correct_option' => $mcq['correct_option'] ?? '',
+    //             'explanation'    => $mcq['explanation'] ?? '',
+    //             'title'          => $mcq['title'] ?? null,
+    //             'image'          => $mcq['image'] ?? null,
+    //             'category_id'    => $categoryId,
+    //             'subcategory_id' => $subcategoryId,
+    //             'topic_id'       => $topicId,
+    //             'created_at'     => now(),
+    //             'updated_at'     => now(),
+    //         ]);
+    //     }
+
+    //     toastr()->success('MCQs imported successfully.');
+    //     return redirect()->route('All.mcqs');
+    // }
+
+    public function importByEachCategory(Request $request)
     {
         $request->validate([
             'file' => 'required|mimes:json',
@@ -264,27 +308,84 @@ class McqsController extends Controller
             'subcategory_id' => 'required|exists:subcategories,id',
             'topic_id' => 'required|exists:topics,id',
         ]);
-
+    
         $categoryId = $request->category_id;
         $subcategoryId = $request->subcategory_id;
         $topicId = $request->topic_id;
-
+    
         $jsonData = file_get_contents($request->file('file')->getRealPath());
         $data = json_decode($jsonData, true);
-
+    
         if (!is_array($data)) {
             toastr()->error('Invalid JSON format.');
             return redirect()->back();
         }
-
-        foreach ($data as $mcq) {
+    
+        $errors = [];
+        $successCount = 0;
+        $uploadedQuestions = []; // Track questions in current upload
+    
+        foreach ($data as $index => $mcq) {
+            // Validate required fields
+            if (empty($mcq['question'])) {
+                $errors[] = "Row " . ($index + 1) . ": Question is required";
+                continue;
+            }
+    
+            $question = trim($mcq['question']);
+    
+            // Check for duplicate in current upload file
+            $questionLower = strtolower($question);
+            if (isset($uploadedQuestions[$questionLower])) {
+                $errors[] = "Row " . ($index + 1) . ": Duplicate question in upload file (also found at row " . $uploadedQuestions[$questionLower] . ")";
+                continue;
+            }
+    
+            // Check if question already exists in database for this topic
+            $existingMcq = DB::table('mcqs')
+                ->where('topic_id', $topicId)
+                ->whereRaw('LOWER(question) = ?', [$questionLower])
+                ->first();
+    
+            if ($existingMcq) {
+                $errors[] = "Row " . ($index + 1) . ": Question already exists in database for this topic";
+                continue;
+            }
+    
+            // Mark this question as seen in current upload
+            $uploadedQuestions[$questionLower] = $index + 1;
+    
+            // Check if correct_option key exists
+            if (!isset($mcq['correct_option'])) {
+                $errors[] = "Row " . ($index + 1) . ": Missing 'correct_option' key. Found: " . (isset($mcq['correct_answer']) ? "'correct_answer' instead" : "no correct answer key");
+                continue;
+            }
+    
+            $correctOption = $mcq['correct_option'];
+    
+            // Validate format: must be exactly 'a', 'b', 'c', 'd', 'A', 'B', 'C', or 'D'
+            if (!in_array($correctOption, ['a', 'b', 'c', 'd', 'A', 'B', 'C', 'D'])) {
+                $errors[] = "Row " . ($index + 1) . ": Invalid 'correct_option' value '$correctOption'. Must be a, b, c, d, A, B, C, or D only";
+                continue;
+            }
+    
+            // Normalize to lowercase for database
+            $correctOption = strtolower($correctOption);
+    
+            // Validate that the option exists
+            $optionKey = 'option_' . $correctOption;
+            if (!isset($mcq[$optionKey]) || empty($mcq[$optionKey])) {
+                $errors[] = "Row " . ($index + 1) . ": Correct option '$correctOption' doesn't exist in the options";
+                continue;
+            }
+    
             DB::table('mcqs')->insert([
-                'question'       => $mcq['question'] ?? '',
+                'question'       => $question,
                 'option_a'       => $mcq['option_a'] ?? '',
                 'option_b'       => $mcq['option_b'] ?? '',
                 'option_c'       => $mcq['option_c'] ?? '',
                 'option_d'       => $mcq['option_d'] ?? '',
-                'correct_option' => $mcq['correct_option'] ?? '',
+                'correct_option' => $correctOption,
                 'explanation'    => $mcq['explanation'] ?? '',
                 'title'          => $mcq['title'] ?? null,
                 'image'          => $mcq['image'] ?? null,
@@ -294,9 +395,24 @@ class McqsController extends Controller
                 'created_at'     => now(),
                 'updated_at'     => now(),
             ]);
+    
+            $successCount++;
         }
-
-        toastr()->success('MCQs imported successfully.');
+    
+        // Show results
+        if ($successCount > 0) {
+            toastr()->success("$successCount MCQs imported successfully.");
+        }
+        
+        if (!empty($errors)) {
+            foreach (array_slice($errors, 0, 5) as $error) { // Show first 5 errors
+                toastr()->error($error);
+            }
+            if (count($errors) > 5) {
+                toastr()->warning((count($errors) - 5) . ' more errors found.');
+            }
+        }
+    
         return redirect()->route('All.mcqs');
     }
 
