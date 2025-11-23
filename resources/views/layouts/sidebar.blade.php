@@ -78,6 +78,9 @@
             <div class="bg-white py-2 collapse-inner rounded shadow-sm">
                 <a class="collapse-item" href="{{ route('mcqs.add') }}"><i class="fas fa-plus-circle text-success"></i> Add Mcq</a>
                 <a class="collapse-item" href="{{ route('All.mcqs') }}"><i class="fas fa-list text-primary"></i> View Mcqs</a>
+                <a class="collapse-item" href="{{ route('mcqs.import.form') }}">
+                <i class="fas fa-file-upload text-info"></i> Import MCQs
+            </a>
             </div>
         </div>
     </li>
@@ -121,27 +124,5 @@
             <span>Logout</span>
         </a>
     </li>
-
-    <!-- MCQs -->
-<li class="nav-item">
-    <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseMcqs"
-        aria-expanded="false" aria-controls="collapseMcqs">
-        <i class="fas fa-question-circle"></i>
-        <span>MCQs</span>
-    </a>
-    <div id="collapseMcqs" class="collapse" aria-labelledby="headingMcqs" data-parent="#accordionSidebar">
-        <div class="bg-white py-2 collapse-inner rounded shadow-sm">
-            <a class="collapse-item" href="{{ route('mcqs.add') }}">
-                <i class="fas fa-plus-circle text-success"></i> Add Mcq
-            </a>
-            <a class="collapse-item" href="{{ route('All.mcqs') }}">
-                <i class="fas fa-list text-primary"></i> View Mcqs
-            </a>
-            <a class="collapse-item" href="{{ route('mcqs.import.form') }}">
-                <i class="fas fa-file-upload text-info"></i> Import MCQs
-            </a>
-        </div>
-    </div>
-</li>
 
 </ul>
