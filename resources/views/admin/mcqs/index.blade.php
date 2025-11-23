@@ -13,7 +13,7 @@
 
         <div class="card-body">
             <!-- Import Section -->
-            <div class="row mb-4">
+            <!-- <div class="row mb-4">
                 <div class="col-md-6">
                     <div class="card border-primary">
                         <div class="card-header bg-primary text-white">
@@ -51,7 +51,7 @@
                         </div>
                     </div>
                 </div>
-            </div>
+            </div> -->
 
             <!-- Search -->
             <form action="{{ route('mcqs.index') }}" method="GET" class="mb-3">
@@ -60,6 +60,7 @@
                            placeholder="🔍 Search for questions"
                            value="{{ $search ?? '' }}">
                     <button class="btn btn-primary shadow-sm" type="submit">Search</button>
+                    <a href="{{ route('mcqs.index') }}" class="btn btn-secondary shadow-sm">Reset</a>
                 </div>
             </form>
 
