@@ -302,24 +302,53 @@ class McqsController extends Controller
 
     public function importByEachCategory(Request $request)
     {
-        $request->validate([
-            'file' => 'required|mimes:json',
-            'category_id' => 'required|exists:categories,id',
-            'subcategory_id' => 'required|exists:subcategories,id',
-            'topic_id' => 'required|exists:topics,id',
-        ]);
-    
-        $categoryId = $request->category_id;
-        $subcategoryId = $request->subcategory_id;
-        $topicId = $request->topic_id;
-    
-        $jsonData = file_get_contents($request->file('file')->getRealPath());
-        $data = json_decode($jsonData, true);
-    
-        if (!is_array($data)) {
-            toastr()->error('Invalid JSON format.');
-            return redirect()->back();
-        }
+        try {
+            $request->validate([
+                'file' => 'required|mimes:json',
+                'category_id' => 'required|exists:categories,id',
+                'subcategory_id' => 'required|exists:subcategories,id',
+                'topic_id' => 'required|exists:topics,id',
+            ]);
+        
+            $categoryId = $request->category_id;
+            $subcategoryId = $request->subcategory_id;
+            $topicId = $request->topic_id;
+        
+            // Check file upload
+            if (!$request->hasFile('file')) {
+                toastr()->error('No file was uploaded.');
+                return redirect()->back();
+            }
+            
+            $file = $request->file('file');
+            $jsonData = file_get_contents($file->getRealPath());
+            
+            // Check if file is empty
+            if (empty($jsonData)) {
+                toastr()->error('The uploaded file is empty.');
+                return redirect()->back();
+            }
+            
+            $data = json_decode($jsonData, true);
+            
+            // Check JSON decoding errors
+            if (json_last_error() !== JSON_ERROR_NONE) {
+                toastr()->error('Invalid JSON format: ' . json_last_error_msg());
+                return redirect()->back();
+            }
+            
+            if (!is_array($data)) {
+                toastr()->error('Invalid JSON data format. Expected an array of MCQs.');
+                return redirect()->back();
+            }
+            
+            // Log the first item for debugging
+            \Log::info('First MCQ item in JSON:', [
+                'keys' => !empty($data[0]) ? array_keys($data[0]) : 'Empty data',
+                'category_id' => $categoryId,
+                'subcategory_id' => $subcategoryId,
+                'topic_id' => $topicId
+            ]);
     
         $errors = [];
         $successCount = 0;
@@ -355,17 +384,34 @@ class McqsController extends Controller
             // Mark this question as seen in current upload
             $uploadedQuestions[$questionLower] = $index + 1;
     
-            // Check if correct_option key exists
-            if (!isset($mcq['correct_option'])) {
-                $errors[] = "Row " . ($index + 1) . ": Missing 'correct_option' key. Found: " . (isset($mcq['correct_answer']) ? "'correct_answer' instead" : "no correct answer key");
+            // Check if correct_option key exists (try both 'correct_option' and 'correct_answer' for backward compatibility)
+            $correctOption = null;
+            if (isset($mcq['correct_option'])) {
+                $correctOption = $mcq['correct_option'];
+            } elseif (isset($mcq['correct_answer'])) {
+                $correctOption = $mcq['correct_answer'];
+                // Log the use of 'correct_answer' for debugging
+                \Log::info('Using correct_answer instead of correct_option', ['row' => $index + 1]);
+            } else {
+                $errors[] = "Row " . ($index + 1) . ": Missing 'correct_option' key";
                 continue;
             }
     
-            $correctOption = $mcq['correct_option'];
-    
-            // Validate format: must be exactly 'a', 'b', 'c', 'd', 'A', 'B', 'C', or 'D'
-            if (!in_array($correctOption, ['a', 'b', 'c', 'd', 'A', 'B', 'C', 'D'])) {
-                $errors[] = "Row " . ($index + 1) . ": Invalid 'correct_option' value '$correctOption'. Must be a, b, c, d, A, B, C, or D only";
+            // Normalize the correct option to lowercase and validate
+            $correctOption = strtolower(trim($correctOption));
+            
+            // Check if the value is a number (1-4) and convert to letter if needed
+            if (is_numeric($correctOption) && $correctOption >= 1 && $correctOption <= 4) {
+                $correctOption = chr(96 + $correctOption); // Convert 1->a, 2->b, etc.
+                \Log::info('Converted numeric option to letter', [
+                    'original' => $mcq['correct_option'] ?? $mcq['correct_answer'] ?? 'none',
+                    'converted' => $correctOption
+                ]);
+            }
+            
+            // Validate format: must be exactly 'a', 'b', 'c', or 'd' (case insensitive)
+            if (!in_array($correctOption, ['a', 'b', 'c', 'd'])) {
+                $errors[] = "Row " . ($index + 1) . ": Invalid 'correct_option' value '" . ($mcq['correct_option'] ?? $mcq['correct_answer'] ?? '') . "'. Must be a, b, c, or d (or 1, 2, 3, 4)";
                 continue;
             }
     
@@ -399,21 +445,51 @@ class McqsController extends Controller
             $successCount++;
         }
     
-        // Show results
-        if ($successCount > 0) {
-            toastr()->success("$successCount MCQs imported successfully.");
-        }
-        
-        if (!empty($errors)) {
-            foreach (array_slice($errors, 0, 5) as $error) { // Show first 5 errors
-                toastr()->error($error);
+            // Log successful imports
+            if ($successCount > 0) {
+                \Log::info("Successfully imported $successCount MCQs", [
+                    'category_id' => $categoryId,
+                    'subcategory_id' => $subcategoryId,
+                    'topic_id' => $topicId
+                ]);
+                toastr()->success("$successCount MCQs imported successfully.");
+            } else {
+                \Log::warning('No MCQs were imported', [
+                    'total_attempted' => count($data),
+                    'errors_count' => count($errors)
+                ]);
             }
-            if (count($errors) > 5) {
-                toastr()->warning((count($errors) - 5) . ' more errors found.');
+            
+            // Show errors if any
+            if (!empty($errors)) {
+                $errorCount = count($errors);
+                $maxErrorsToShow = 5;
+                
+                // Log all errors
+                \Log::error("MCQ import encountered $errorCount errors", [
+                    'first_few_errors' => array_slice($errors, 0, $maxErrorsToShow)
+                ]);
+                
+                // Show first few errors to user
+                foreach (array_slice($errors, 0, $maxErrorsToShow) as $error) {
+                    toastr()->error($error);
+                }
+                
+                if ($errorCount > $maxErrorsToShow) {
+                    $remaining = $errorCount - $maxErrorsToShow;
+                    toastr()->warning("$remaining more errors found. Check the log for details.");
+                }
             }
+            
+            return redirect()->route('All.mcqs');
+            
+        } catch (\Exception $e) {
+            \Log::error('Error in importByEachCategory: ' . $e->getMessage(), [
+                'trace' => $e->getTraceAsString()
+            ]);
+            toastr()->error('An error occurred while importing MCQs. Please check the log for details.');
+            return redirect()->back();
         }
-    
-        return redirect()->route('All.mcqs');
     }
 
 
