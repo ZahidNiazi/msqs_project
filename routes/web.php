@@ -268,9 +268,14 @@ Route::get('/admin/mcqs', [McqsController::class, 'search'])->name('mcqs.index')
 Route::get('/admin/mcqs/import', [McqsController::class, 'showImportForm'])->name('mcqs.import.form');
 Route::post('/admin/mcqs/import', [McqsController::class, 'importByEachCategory'])->name('mcqs.import');
 
+// Second Import MCQs
+Route::get('/admin/mcqs/import2', [McqsController::class, 'showImportForm2'])->name('mcqs.import2.form');
+Route::post('/admin/mcqs/import2', [McqsController::class, 'importByEachCategory2'])->name('mcqs.import2');
+
 // AJAX Endpoints
 Route::get('/get-subcategories/{id}', [McqsController::class, 'getSubcategories']);
 Route::get('/get-topics/{id}', [McqsController::class, 'getTopics']);
+
 
 Route::get('/test-mcqs', function () {
     $mcqCount = \App\Models\Mcq::count();

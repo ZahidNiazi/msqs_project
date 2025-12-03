@@ -492,8 +492,260 @@ class McqsController extends Controller
         }
     }
 
+    // Second Import Form
+    public function showImportForm2()
+    {
+        $categories = Category::all();
+        return view('admin.mcqs.import2', compact('categories'));
+    }
+
+    public function importByEachCategory2(Request $request)
+    {
+        try {
+            $request->validate([
+                'file' => 'required|mimes:json',
+                'category_id' => 'required|exists:categories,id',
+                'subcategory_id' => 'required|exists:subcategories,id',
+                'topic_id' => 'required|exists:topics,id',
+            ]);
+        
+            $categoryId = $request->category_id;
+            $subcategoryId = $request->subcategory_id;
+            $topicId = $request->topic_id;
+        
+            // Check file upload
+            if (!$request->hasFile('file')) {
+                toastr()->error('No file was uploaded.');
+                return redirect()->back();
+            }
+            
+            $file = $request->file('file');
+            $jsonData = file_get_contents($file->getRealPath());
+            
+            // Check if file is empty
+            if (empty($jsonData)) {
+                toastr()->error('The uploaded file is empty.');
+                return redirect()->back();
+            }
+            
+            $data = json_decode($jsonData, true);
+            
+            // Check JSON decoding errors
+            if (json_last_error() !== JSON_ERROR_NONE) {
+                toastr()->error('Invalid JSON format: ' . json_last_error_msg());
+                return redirect()->back();
+            }
+            
+            if (!is_array($data)) {
+                toastr()->error('Invalid JSON data format. Expected an array of MCQs.');
+                return redirect()->back();
+            }
+            
+            // Log the first item for debugging
+            \Log::info('Second Import - First MCQ item in JSON:', [
+                'keys' => !empty($data[0]) ? array_keys($data[0]) : 'Empty data',
+                'category_id' => $categoryId,
+                'subcategory_id' => $subcategoryId,
+                'topic_id' => $topicId
+            ]);
+    
+        $errors = [];
+        $successCount = 0;
+        $uploadedQuestions = []; // Track questions in current upload
+    
+        foreach ($data as $index => $mcq) {
+            // Validate required fields
+            if (empty($mcq['question'])) {
+                $errors[] = "Row " . ($index + 1) . ": Question is required";
+                continue;
+            }
+    
+            $question = trim($mcq['question']);
+    
+            // Check for duplicate in current upload file
+            $questionLower = strtolower($question);
+            if (isset($uploadedQuestions[$questionLower])) {
+                $errors[] = "Row " . ($index + 1) . ": Duplicate question in upload file (also found at row " . $uploadedQuestions[$questionLower] . ")";
+                continue;
+            }
+    
+            // Check if question already exists in database (ignoring category, subcategory, topic)
+            $existingMcq = DB::table('mcqs')
+                ->whereRaw('LOWER(question) = ?', [$questionLower])
+                ->first();
+    
+            // If question exists, check if we should update the correct_option
+            if ($existingMcq) {
+                // If existing question already has a correct_option set, skip this question
+                if (!empty($existingMcq->correct_option)) {
+                    \Log::info('Question already exists with correct_option set, skipping', [
+                        'row' => $index + 1,
+                        'question' => substr($question, 0, 50),
+                        'existing_correct_option' => $existingMcq->correct_option,
+                        'existing_category_id' => $existingMcq->category_id,
+                        'existing_topic_id' => $existingMcq->topic_id
+                    ]);
+                    $errors[] = "Row " . ($index + 1) . ": Question already exists with correct answer set";
+                    continue;
+                }
+                
+                // If existing question has null correct_option, check if JSON has a valid one
+                if (isset($mcq['correct_option']) && !empty($mcq['correct_option'])) {
+                    $newCorrectOption = strtolower(trim($mcq['correct_option']));
+                    
+                    // Convert numeric to letter if needed
+                    if (is_numeric($newCorrectOption) && $newCorrectOption >= 1 && $newCorrectOption <= 4) {
+                        $newCorrectOption = chr(96 + $newCorrectOption);
+                    }
+                    
+                    // Validate the new correct option
+                    if (in_array($newCorrectOption, ['a', 'b', 'c', 'd'])) {
+                        // Update only the correct_option field
+                        DB::table('mcqs')
+                            ->where('id', $existingMcq->id)
+                            ->update([
+                                'correct_option' => $newCorrectOption,
+                                'updated_at' => now()
+                            ]);
+                        
+                        \Log::info('Updated correct_option for existing question (global search)', [
+                            'row' => $index + 1,
+                            'mcq_id' => $existingMcq->id,
+                            'new_correct_option' => $newCorrectOption,
+                            'existing_category_id' => $existingMcq->category_id,
+                            'existing_topic_id' => $existingMcq->topic_id
+                        ]);
+                        
+                        $successCount++;
+                        continue;
+                    }
+                }
+                
+                // If we reach here, question exists with null correct_option but JSON doesn't have valid one
+                $errors[] = "Row " . ($index + 1) . ": Question exists without correct answer, but no valid correct_option provided in JSON";
+                continue;
+            }
+    
+            // Mark this question as seen in current upload
+            $uploadedQuestions[$questionLower] = $index + 1;
+    
+            // Check if all options are available
+            $hasAllOptions = isset($mcq['option_a']) && !empty($mcq['option_a']) &&
+                           isset($mcq['option_b']) && !empty($mcq['option_b']) &&
+                           isset($mcq['option_c']) && !empty($mcq['option_c']) &&
+                           isset($mcq['option_d']) && !empty($mcq['option_d']);
+    
+            // Check if correct_option key exists (try both 'correct_option' and 'correct_answer' for backward compatibility)
+            $correctOption = null;
+            if (isset($mcq['correct_option']) && !empty($mcq['correct_option'])) {
+                $correctOption = $mcq['correct_option'];
+            } elseif (isset($mcq['correct_answer']) && !empty($mcq['correct_answer'])) {
+                $correctOption = $mcq['correct_answer'];
+                // Log the use of 'correct_answer' for debugging
+                \Log::info('Using correct_answer instead of correct_option', ['row' => $index + 1]);
+            } else {
+                // If correct_option is null/missing but all options are available, allow it
+                if ($hasAllOptions) {
+                    \Log::info('Question has all options but no correct_option set', [
+                        'row' => $index + 1,
+                        'question' => substr($question, 0, 50)
+                    ]);
+                    // Set to null and allow insertion without correct_option
+                    $correctOption = null;
+                } else {
+                    $errors[] = "Row " . ($index + 1) . ": Missing 'correct_option' key";
+                    continue;
+                }
+            }
+    
+            // Only validate and normalize if correctOption is not null
+            if ($correctOption !== null) {
+                // Normalize the correct option to lowercase and validate
+                $correctOption = strtolower(trim($correctOption));
+                
+                // Check if the value is a number (1-4) and convert to letter if needed
+                if (is_numeric($correctOption) && $correctOption >= 1 && $correctOption <= 4) {
+                    $correctOption = chr(96 + $correctOption); // Convert 1->a, 2->b, etc.
+                    \Log::info('Converted numeric option to letter', [
+                        'original' => $mcq['correct_option'] ?? $mcq['correct_answer'] ?? 'none',
+                        'converted' => $correctOption
+                    ]);
+                }
+                
+                // Validate format: must be exactly 'a', 'b', 'c', or 'd' (case insensitive)
+                if (!in_array($correctOption, ['a', 'b', 'c', 'd'])) {
+                    $errors[] = "Row " . ($index + 1) . ": Invalid 'correct_option' value '" . ($mcq['correct_option'] ?? $mcq['correct_answer'] ?? '') . "'. Must be a, b, c, or d (or 1, 2, 3, 4)";
+                    continue;
+                }
+        
+                // Normalize to lowercase for database
+                $correctOption = strtolower($correctOption);
+        
+                // Validate that the option exists
+                $optionKey = 'option_' . $correctOption;
+                if (!isset($mcq[$optionKey]) || empty($mcq[$optionKey])) {
+                    $errors[] = "Row " . ($index + 1) . ": Correct option '$correctOption' doesn't exist in the options";
+                    continue;
+                }
+            }
+    
+            // If question doesn't exist, don't allow creating new MCQs in import2
+            // This import method is ONLY for updating existing questions' correct_option
+            \Log::warning('Attempted to add new question via import2, rejected', [
+                'row' => $index + 1,
+                'question' => substr($question, 0, 50)
+            ]);
+            $errors[] = "Row " . ($index + 1) . ": Cannot add new MCQs via this import. Question does not exist in database. Use 'Import MCQs' instead.";
+        }
+    
+            // Log successful imports
+            if ($successCount > 0) {
+                \Log::info("Second Import - Successfully imported $successCount MCQs", [
+                    'category_id' => $categoryId,
+                    'subcategory_id' => $subcategoryId,
+                    'topic_id' => $topicId
+                ]);
+                toastr()->success("$successCount MCQs imported successfully.");
+            } else {
+                \Log::warning('Second Import - No MCQs were imported', [
+                    'total_attempted' => count($data),
+                    'errors_count' => count($errors)
+                ]);
+            }
+            
+            // Show errors if any
+            if (!empty($errors)) {
+                $errorCount = count($errors);
+                $maxErrorsToShow = 5;
+                
+                // Log all errors
+                \Log::error("Second Import - MCQ import encountered $errorCount errors", [
+                    'first_few_errors' => array_slice($errors, 0, $maxErrorsToShow)
+                ]);
+                
+                // Show first few errors to user
+                foreach (array_slice($errors, 0, $maxErrorsToShow) as $error) {
+                    toastr()->error($error);
+                }
+                
+                if ($errorCount > $maxErrorsToShow) {
+                    $remaining = $errorCount - $maxErrorsToShow;
+                    toastr()->warning("$remaining more errors found. Check the log for details.");
+                }
+            }
+            
+            return redirect()->route('All.mcqs');
+            
+        } catch (\Exception $e) {
+            \Log::error('Error in importByEachCategory2: ' . $e->getMessage(), [
+                'trace' => $e->getTraceAsString()
+            ]);
+            toastr()->error('An error occurred while importing MCQs. Please check the log for details.');
+            return redirect()->back();
+        }
+    }
+
 
 
 
 }
-

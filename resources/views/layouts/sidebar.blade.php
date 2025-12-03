@@ -31,8 +31,10 @@
         </a>
         <div id="collapseCategory" class="collapse" aria-labelledby="headingCategory" data-parent="#accordionSidebar">
             <div class="bg-white py-2 collapse-inner rounded shadow-sm">
-                <a class="collapse-item" href="{{ route('category.add') }}"><i class="fas fa-plus-circle text-success"></i> Add Subject</a>
-                <a class="collapse-item" href="{{ route('All.Category') }}"><i class="fas fa-list text-primary"></i> View Categories</a>
+                <a class="collapse-item" href="{{ route('category.add') }}"><i
+                        class="fas fa-plus-circle text-success"></i> Add Subject</a>
+                <a class="collapse-item" href="{{ route('All.Category') }}"><i class="fas fa-list text-primary"></i>
+                    View Categories</a>
             </div>
         </div>
     </li>
@@ -44,10 +46,13 @@
             <i class="fas fa-sitemap"></i>
             <span>Subcategories</span>
         </a>
-        <div id="collapseSubcategory" class="collapse" aria-labelledby="headingSubcategory" data-parent="#accordionSidebar">
+        <div id="collapseSubcategory" class="collapse" aria-labelledby="headingSubcategory"
+            data-parent="#accordionSidebar">
             <div class="bg-white py-2 collapse-inner rounded shadow-sm">
-                <a class="collapse-item" href="{{ route('subcategory.add') }}"><i class="fas fa-plus-circle text-success"></i> Add Subcategory</a>
-                <a class="collapse-item" href="{{ route('all.subcategory') }}"><i class="fas fa-list text-primary"></i> View Subcategories</a>
+                <a class="collapse-item" href="{{ route('subcategory.add') }}"><i
+                        class="fas fa-plus-circle text-success"></i> Add Subcategory</a>
+                <a class="collapse-item" href="{{ route('all.subcategory') }}"><i class="fas fa-list text-primary"></i>
+                    View Subcategories</a>
             </div>
         </div>
     </li>
@@ -61,8 +66,10 @@
         </a>
         <div id="collapseTopic" class="collapse" aria-labelledby="headingTopic" data-parent="#accordionSidebar">
             <div class="bg-white py-2 collapse-inner rounded shadow-sm">
-                <a class="collapse-item" href="{{ route('admin.add.topic') }}"><i class="fas fa-plus-circle text-success"></i> Add Topic</a>
-                <a class="collapse-item" href="{{ route('admin.all.topic') }}"><i class="fas fa-list text-primary"></i> View Topics</a>
+                <a class="collapse-item" href="{{ route('admin.add.topic') }}"><i
+                        class="fas fa-plus-circle text-success"></i> Add Topic</a>
+                <a class="collapse-item" href="{{ route('admin.all.topic') }}"><i class="fas fa-list text-primary"></i>
+                    View Topics</a>
             </div>
         </div>
     </li>
@@ -76,11 +83,16 @@
         </a>
         <div id="collapseMcqs" class="collapse" aria-labelledby="headingMcqs" data-parent="#accordionSidebar">
             <div class="bg-white py-2 collapse-inner rounded shadow-sm">
-                <a class="collapse-item" href="{{ route('mcqs.add') }}"><i class="fas fa-plus-circle text-success"></i> Add Mcq</a>
-                <a class="collapse-item" href="{{ route('All.mcqs') }}"><i class="fas fa-list text-primary"></i> View Mcqs</a>
+                <a class="collapse-item" href="{{ route('mcqs.add') }}"><i class="fas fa-plus-circle text-success"></i>
+                    Add Mcq</a>
+                <a class="collapse-item" href="{{ route('All.mcqs') }}"><i class="fas fa-list text-primary"></i> View
+                    Mcqs</a>
                 <a class="collapse-item" href="{{ route('mcqs.import.form') }}">
-                <i class="fas fa-file-upload text-info"></i> Import MCQs
-            </a>
+                    <i class="fas fa-file-upload text-info"></i> Import MCQs
+                </a>
+                <a class="collapse-item" href="{{ route('mcqs.import2.form') }}">
+                    <i class="fas fa-file-import text-warning"></i> Import MCQs 2
+                </a>
             </div>
         </div>
     </li>
@@ -94,8 +106,10 @@
         </a>
         <div id="collapseAbout" class="collapse" aria-labelledby="headingAbout" data-parent="#accordionSidebar">
             <div class="bg-white py-2 collapse-inner rounded shadow-sm">
-                <a class="collapse-item" href="{{ route('aboutus.create') }}"><i class="fas fa-plus-circle text-success"></i> Add About Us</a>
-                <a class="collapse-item" href="{{ route('aboutus.index') }}"><i class="fas fa-list text-primary"></i> View About Us</a>
+                <a class="collapse-item" href="{{ route('aboutus.create') }}"><i
+                        class="fas fa-plus-circle text-success"></i> Add About Us</a>
+                <a class="collapse-item" href="{{ route('aboutus.index') }}"><i
+                        class="fas fa-list text-primary"></i> View About Us</a>
             </div>
         </div>
     </li>
@@ -109,7 +123,8 @@
         </a>
         <div id="collapseReports" class="collapse" aria-labelledby="headingReports" data-parent="#accordionSidebar">
             <div class="bg-white py-2 collapse-inner rounded shadow-sm">
-                <a class="collapse-item" href="{{ route('reports.mcqs') }}"><i class="fas fa-file-alt text-warning"></i> MCQs Reports</a>
+                <a class="collapse-item" href="{{ route('reports.mcqs') }}"><i
+                        class="fas fa-file-alt text-warning"></i> MCQs Reports</a>
             </div>
         </div>
     </li>
