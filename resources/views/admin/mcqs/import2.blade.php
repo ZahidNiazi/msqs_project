@@ -4,7 +4,7 @@
     <div class="container mt-4">
         <div class="card shadow-sm border-0" style="background-color: #f9f9f9;">
             <div class="card-body">
-                <h4 class="mb-4 text-primary">Import MCQs for Selected Category, Subcategory & Topic (Import 2)</h4>
+                <h4 class="mb-4 text-primary">Import MCQs for Correct_option selct any category, subcategory & topic </h4>
 
                 <form action="{{ route('mcqs.import2') }}" method="POST" enctype="multipart/form-data">
                     @csrf
